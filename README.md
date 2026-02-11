@@ -55,3 +55,4 @@ iwr https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.ps1 | 
 
 ---
 *Maintained by CashlyCash & HKTITAN.*
+*Vibe coded by OpenClaw (orchestrating multiple AI models).*
