@@ -28,6 +28,28 @@ body {
   border-bottom: 1px solid #333;
 }
 
+.peer-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.peer-name {
+  font-weight: 600;
+}
+
+.peer-ip {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.peer-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .status-dot {
   width: 10px;
   height: 10px;
@@ -35,3 +57,51 @@ body {
 }
 .status-dot.active { background: #4caf50; }
 .status-dot.inactive { background: #f44336; }
+
+.peer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-connect {
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-connect:hover {
+  background: #45a049;
+}
+
+.btn-disconnect {
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-disconnect:hover {
+  background: #d32f2f;
+}
+
+.btn-connecting {
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: not-allowed;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.connection-error {
+  color: #f44336;
+  font-size: 0.75rem;
+}

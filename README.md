@@ -13,14 +13,15 @@ This is a complete rewrite of the PeaPod protocol. We're moving from the old arc
 
 We are executing a 5-Phase Plan for World Domination™️ (or just file sharing):
 
-1.  **Phase 1: Discovery UI (Current)**
+1.  **Phase 1: Discovery UI ✅**
     *   See nearby devices on the LAN.
     *   UDP Multicast/Broadcast beaconing.
     *   "Oh look, there's Harshit's laptop!"
 
-2.  **Phase 2: Basic Communication**
-    *   Establish reliable TCP/QUIC pipes between peers.
+2.  **Phase 2: Basic Communication (Current)**
+    *   Establish reliable TCP pipes between peers.
     *   Handshakes, Identity Exchange.
+    *   Connect/Disconnect from discovered peers.
 
 3.  **Phase 3: The Chunking**
     *   Split large files into tiny, edible peas (chunks).

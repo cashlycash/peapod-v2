@@ -9,42 +9,86 @@ interface PeerPayload {
   port: number;
 }
 
+interface ConnectionEvent {
+  peer_id: string;
+  status: 'connected' | 'disconnected' | 'error';
+}
+
 interface Peer extends PeerPayload {
   status: 'active' | 'inactive';
   lastSeen: number;
+  connectionStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
 }
 
 function App() {
   const [peers, setPeers] = useState<Peer[]>([]);
 
   useEffect(() => {
-    // Listen for discovery events from Rust
-    let unlisten: (() => void) | undefined;
+    let unlistenPeer: (() => void) | undefined;
+    let unlistenConn: (() => void) | undefined;
 
-    const setupListener = async () => {
-      unlisten = await listen<PeerPayload>('peer-update', (event) => {
+    const setupListeners = async () => {
+      // Listen for discovery events from Rust
+      unlistenPeer = await listen<PeerPayload>('peer-update', (event) => {
         const newPeer = event.payload;
         setPeers((prev) => {
           const exists = prev.find((p) => p.id === newPeer.id);
           if (exists) {
-            // Update timestamp
             return prev.map((p) => 
               p.id === newPeer.id ? { ...p, lastSeen: Date.now(), status: 'active' } : p
             );
           }
-          // Add new peer
-          return [...prev, { ...newPeer, status: 'active', lastSeen: Date.now() }];
+          return [...prev, { ...newPeer, status: 'active', lastSeen: Date.now(), connectionStatus: 'disconnected' }];
         });
+      });
+
+      // Listen for connection status events
+      unlistenConn = await listen<ConnectionEvent>('connection-status', (event) => {
+        const { peer_id, status } = event.payload;
+        setPeers((prev) =>
+          prev.map((p) =>
+            p.id === peer_id
+              ? { ...p, connectionStatus: status === 'connected' ? 'connected' : status === 'error' ? 'error' : 'disconnected' }
+              : p
+          )
+        );
       });
     };
 
-    setupListener();
+    setupListeners();
 
-    // Cleanup on unmount
     return () => {
-      if (unlisten) unlisten();
+      if (unlistenPeer) unlistenPeer();
+      if (unlistenConn) unlistenConn();
     };
   }, []);
+
+  const handleConnect = async (peer: Peer) => {
+    setPeers((prev) =>
+      prev.map((p) => (p.id === peer.id ? { ...p, connectionStatus: 'connecting' } : p))
+    );
+
+    try {
+      await invoke('connect_to_peer', {
+        peerId: peer.id,
+        ip: peer.ip,
+        port: peer.port,
+      });
+    } catch (err) {
+      console.error('Connection failed:', err);
+      setPeers((prev) =>
+        prev.map((p) => (p.id === peer.id ? { ...p, connectionStatus: 'error' } : p))
+      );
+    }
+  };
+
+  const handleDisconnect = async (peer: Peer) => {
+    try {
+      await invoke('disconnect_from_peer', { peerId: peer.id });
+    } catch (err) {
+      console.error('Disconnect failed:', err);
+    }
+  };
 
   return (
     <div className="container">
@@ -68,6 +112,24 @@ function App() {
                 <div className="peer-status">
                   <span className={`status-dot ${peer.status}`}></span>
                   <span className="status-text">{peer.status}</span>
+                </div>
+                <div className="peer-actions">
+                  {peer.connectionStatus === 'connected' ? (
+                    <button className="btn-disconnect" onClick={() => handleDisconnect(peer)}>
+                      Disconnect
+                    </button>
+                  ) : peer.connectionStatus === 'connecting' ? (
+                    <button className="btn-connecting" disabled>
+                      Connecting...
+                    </button>
+                  ) : (
+                    <button className="btn-connect" onClick={() => handleConnect(peer)}>
+                      Connect
+                    </button>
+                  )}
+                  {peer.connectionStatus === 'error' && (
+                    <span className="connection-error">Connection failed</span>
+                  )}
                 </div>
               </li>
             ))}
