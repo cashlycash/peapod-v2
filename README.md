@@ -54,4 +54,4 @@ iwr https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.ps1 | 
 - **Protocol:** Custom JSON over TCP (Port 45679) + UDP Multicast (Port 45678)
 
 ---
-*Maintained by CashlyBot & HKTITAN.*
+*Maintained by CashlyCash & HKTITAN.*

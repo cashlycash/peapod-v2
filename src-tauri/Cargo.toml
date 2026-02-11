@@ -2,7 +2,7 @@
 name = "peapod"
 version = "0.6.0"
 description = "PeaPod: Local swarm protocol"
-authors = ["CashlyBot"]
+authors = ["CashlyCash"]
 edition = "2021"
 
 [build-dependencies]
