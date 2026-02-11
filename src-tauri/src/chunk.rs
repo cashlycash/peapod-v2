@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tokio::fs::{self, File};
-use tokio::io::{AsyncReadExt, AsyncWriteExt, SeekFrom};
+use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt, SeekFrom};
 use uuid::Uuid;
 
 pub const CHUNK_SIZE: u64 = 1024 * 1024; // 1MB
@@ -31,9 +31,10 @@ pub struct FileTransfer {
     pub total_size: u64,
     pub chunks: Vec<Chunk>,
     pub output_path: String,
-    pub source_path: Option<String>, // If we are serving the file
+    pub source_path: Option<String>, 
 }
 
+#[derive(Default)]
 pub struct ChunkManager {
     transfers: Mutex<HashMap<String, FileTransfer>>,
 }
@@ -125,11 +126,9 @@ impl ChunkManager {
             } else { return; }
         };
 
-        // Open in RW mode, create if missing
         if let Ok(mut file) = fs::OpenOptions::new().write(true).create(true).open(path).await {
             if let Ok(_) = file.seek(SeekFrom::Start(start)).await {
                 let _ = file.write_all(&data).await;
-                // Update status
                 let mut map = self.transfers.lock().unwrap();
                 if let Some(t) = map.get_mut(file_id) {
                     if let Some(c) = t.chunks.get_mut(index as usize) {

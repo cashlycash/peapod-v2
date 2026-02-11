@@ -1,18 +1,18 @@
-mod core;
-mod chunk;
-
+use peapod::chunk::ChunkManager;
+use peapod::discovery::run_discovery;
+use peapod::protocol::Beacon;
+use peapod::state::{AppState, PeerEmitter};
+use peapod::transport::run_tcp_listener;
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 use uuid::Uuid;
-use crate::core::{run_discovery, run_tcp_listener, AppState, Beacon, PeerEmitter};
-use crate::chunk::ChunkManager;
 
 // Event payload to Frontend
 #[derive(Debug, Clone, serde::Serialize)]
 struct PeerFound {
     id: String,
     name: String,
-    ip: String, 
+    ip: String,
     port: u16,
 }
 
@@ -22,10 +22,10 @@ struct TauriEmitter {
 
 impl PeerEmitter for TauriEmitter {
     fn emit(&self, peer: Beacon) {
-         let event = PeerFound {
+        let event = PeerFound {
             id: peer.device_id,
             name: peer.name,
-            ip: "unknown".to_string(), 
+            ip: "unknown".to_string(),
             port: peer.port,
         };
         let _ = self.handle.emit("peer-update", &event);
@@ -36,7 +36,11 @@ impl PeerEmitter for TauriEmitter {
 #[tauri::command]
 async fn start_test_transfer(state: tauri::State<'_, Arc<AppState>>) -> Result<String, String> {
     // Creates a dummy file logic
-    let file_id = state.chunk_manager.start_transfer("test.txt".into(), 1024 * 1024 * 5, "/tmp/test_out.txt".into());
+    let file_id = state.chunk_manager.start_transfer(
+        "test.txt".into(),
+        1024 * 1024 * 5,
+        "/tmp/test_out.txt".into(),
+    );
     Ok(format!("Started transfer: {}", file_id))
 }
 
@@ -44,12 +48,12 @@ async fn start_test_transfer(state: tauri::State<'_, Arc<AppState>>) -> Result<S
 async fn main() {
     let chunk_manager = Arc::new(ChunkManager::new());
     let app_state = Arc::new(AppState {
-        chunk_manager, 
+        chunk_manager,
         ..Default::default()
     });
-    
+
     let my_id = Uuid::new_v4().to_string();
-    let my_name = "CashlyPod".to_string(); 
+    let my_name = "CashlyPod".to_string();
 
     tauri::Builder::default()
         .manage(app_state.clone()) // Manage state for commands
