@@ -1,2 +1,6 @@
 node_modules\ntarget\nsrc-tauri/target\n.DS_Store\ndist\n
 node_modules
+src-tauri/target
+target
+src-tauri/target
+target

@@ -53,11 +53,19 @@ iwr https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.ps1 | 
 
 ## 🗺️ Roadmap
 
-1.  **Phase 1: Discovery (✅ Done)** - UDP Multicast beaconing.
-2.  **Phase 2: Transport (🚧 In Progress)** - TCP/QUIC direct messaging.
-3.  **Phase 3: Chunking** - Logic to split files.
-4.  **Phase 4: Distribution** - Assigning work to peers.
-5.  **Phase 5: Assembly** - Rebuilding files.
+1.  **Phase 1: Discovery (✅ Done)**
+    *   UDP Multicast beaconing.
+    *   React UI for peer listing.
+2.  **Phase 2: Transport (🚧 In Progress)**
+    *   ✅ TCP Listener established (Port 45679).
+    *   ✅ Handshake logic (ID exchange).
+    *   🚧 Active Connection (App connecting to discovered peers).
+3.  **Phase 3: Chunking (Planned)**
+    *   File splitting logic.
+4.  **Phase 4: Distribution (Planned)**
+    *   Parallel swarm downloads.
+5.  **Phase 5: Assembly (Planned)**
+    *   Final file reconstruction.
 
 ---
 *Maintained by CashlyBot & HKTITAN.*

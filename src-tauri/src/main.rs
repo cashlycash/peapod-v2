@@ -5,12 +5,14 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use socket2::{Domain, Protocol, Socket, Type};
-use tauri::{AppHandle, Manager, Emitter};
-use tokio::net::UdpSocket;
+use tauri::{AppHandle, Emitter};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream, UdpSocket};
 use uuid::Uuid;
 
 const MULTICAST_ADDR: &str = "239.255.60.60";
 const PORT: u16 = 45678;
+const TCP_PORT: u16 = 45679;
 
 // Beacon: The "Hello" message
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,13 +34,14 @@ struct PeerFound {
 #[derive(Default)]
 struct AppState {
     peers: Mutex<HashMap<String, Beacon>>, // Map device_id -> Beacon
+    active_connections: Mutex<HashMap<String, bool>>, // Map device_id -> connected status
 }
 
 #[tokio::main]
 async fn main() {
     let app_state = Arc::new(AppState::default());
     let my_id = Uuid::new_v4().to_string();
-    let my_name = "CashlyPod".to_string(); // TODO: Get hostname
+    let my_name = "CashlyPod".to_string(); 
 
     tauri::Builder::default()
         .setup(move |app| {
@@ -46,16 +49,127 @@ async fn main() {
             let state_clone = app_state.clone();
             let id_clone = my_id.clone();
             let name_clone = my_name.clone();
+            let tcp_id = my_id.clone();
 
             // Spawn Discovery Task
             tauri::async_runtime::spawn(async move {
                 run_discovery(id_clone, name_clone, state_clone, handle).await;
             });
 
+            // Spawn TCP Listener
+            tauri::async_runtime::spawn(async move {
+                run_tcp_listener(tcp_id, TCP_PORT).await;
+            });
+
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+async fn run_tcp_listener(my_id: String, port: u16) {
+    let addr = format!("0.0.0.0:{}", port);
+    let listener = match TcpListener::bind(&addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("Failed to bind TCP listener on {}: {}", addr, e);
+            return;
+        }
+    };
+    println!("TCP Listener running on {}", addr);
+
+    loop {
+        match listener.accept().await {
+            Ok((socket, addr)) => {
+                println!("New incoming TCP connection from: {:?}", addr);
+                let id_clone = my_id.clone();
+                tokio::spawn(async move {
+                    handle_connection(socket, id_clone, true).await;
+                });
+            }
+            Err(e) => eprintln!("TCP Accept error: {}", e),
+        }
+    }
+}
+
+// Client Connect Logic
+async fn connect_to_peer(peer_id: String, ip: String, port: u16, my_id: String, state: Arc<AppState>) {
+    let addr = format!("{}:{}", ip, port);
+    println!("Attempting to connect to peer {} at {}", peer_id, addr);
+
+    match TcpStream::connect(&addr).await {
+        Ok(socket) => {
+            println!("Connected to peer {}", peer_id);
+            // Mark connected
+            {
+                let mut conns = state.active_connections.lock().unwrap();
+                conns.insert(peer_id.clone(), true);
+            }
+            
+            handle_connection(socket, my_id, false).await;
+            
+            // Mark disconnected after handler returns
+            {
+                let mut conns = state.active_connections.lock().unwrap();
+                conns.remove(&peer_id);
+            }
+            println!("Disconnected from peer {}", peer_id);
+        }
+        Err(e) => {
+            eprintln!("Failed to connect to peer {}: {}", peer_id, e);
+        }
+    }
+}
+
+async fn handle_connection(mut socket: TcpStream, my_id: String, is_server: bool) {
+    // Basic Handshake: Send ID length (u32) + ID bytes
+    let id_bytes = my_id.as_bytes();
+    let len = id_bytes.len() as u32;
+    
+    if let Err(e) = socket.write_all(&len.to_le_bytes()).await {
+        eprintln!("Failed to send handshake len: {}", e);
+        return;
+    }
+    if let Err(e) = socket.write_all(id_bytes).await {
+        eprintln!("Failed to send handshake ID: {}", e);
+        return;
+    }
+
+    // Read Peer Handshake
+    let mut len_buf = [0u8; 4];
+    if let Err(_) = socket.read_exact(&mut len_buf).await {
+        return;
+    }
+    let peer_len = u32::from_le_bytes(len_buf) as usize;
+    
+    // Safety check on length (max 1KB for ID)
+    if peer_len > 1024 {
+        eprintln!("Peer ID too long: {}", peer_len);
+        return;
+    }
+
+    let mut peer_id_buf = vec![0u8; peer_len];
+    if let Err(_) = socket.read_exact(&mut peer_id_buf).await {
+        return;
+    }
+    let peer_id = String::from_utf8_lossy(&peer_id_buf);
+    
+    println!("Handshake success. Connected to peer: {} (Server Mode: {})", peer_id, is_server);
+    
+    // Keep connection open (Echo loop for now)
+    let mut buf = [0u8; 1024];
+    loop {
+        let n = match socket.read(&mut buf).await {
+            Ok(n) if n == 0 => return, // Closed
+            Ok(n) => n,
+            Err(_) => return,
+        };
+        
+        // Echo back
+        if let Err(_) = socket.write_all(&buf[0..n]).await {
+            return;
+        }
+    }
 }
 
 async fn run_discovery(
@@ -66,22 +180,24 @@ async fn run_discovery(
 ) {
     println!("Starting discovery on {}:{}", MULTICAST_ADDR, PORT);
 
-    // Setup Listener Socket (Receive)
-    let listener = create_multicast_socket().expect("Failed to create multicast listener");
+    let listener = match create_multicast_socket() {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("Failed to create multicast socket: {}", e);
+            return;
+        }
+    };
     let listener = UdpSocket::from_std(listener.into()).expect("Failed to convert to Tokio socket");
 
-    // Setup Sender Socket (Broadcast)
     let sender = UdpSocket::bind("0.0.0.0:0").await.expect("Failed to bind sender");
     sender.set_broadcast(true).expect("Failed to set broadcast");
-    // Multicast loopback enabled by default usually, good for testing on one machine.
 
     let beacon = Beacon {
         device_id: my_id.clone(),
         name: my_name.clone(),
-        port: 45679, // TCP port (Placeholder for Phase 2)
+        port: TCP_PORT,
     };
     let beacon_json = serde_json::to_string(&beacon).unwrap();
-    let msg_bytes = beacon_json.as_bytes();
     let target_addr: SocketAddr = format!("{}:{}", MULTICAST_ADDR, PORT).parse().unwrap();
 
     // Spawn Sender Loop
@@ -103,18 +219,16 @@ async fn run_discovery(
     loop {
         match listener.recv_from(&mut buf).await {
             Ok((len, addr)) => {
-                // Ignore our own beacons? (Optional)
-                // If we want to test on one machine, we keep them.
-                
                 if let Ok(peer_beacon) = serde_json::from_slice::<Beacon>(&buf[..len]) {
-                    // Log discovery
                     if peer_beacon.device_id != my_id {
                         let mut peers = state.peers.lock().unwrap();
+                        let mut should_connect = false;
+
                         if !peers.contains_key(&peer_beacon.device_id) {
                             println!("New Peer Discovered: {} ({:?})", peer_beacon.name, addr);
+                            should_connect = true;
                             
                             // Emit to Frontend
-                            // Event: "peer-update"
                             let event = PeerFound {
                                 id: peer_beacon.device_id.clone(),
                                 name: peer_beacon.name.clone(),
@@ -126,8 +240,28 @@ async fn run_discovery(
                                 eprintln!("Failed to emit event: {}", e);
                             }
                         }
-                        // Update last seen timestamp (TODO)
-                        peers.insert(peer_beacon.device_id.clone(), peer_beacon);
+                        peers.insert(peer_beacon.device_id.clone(), peer_beacon.clone());
+                        
+                        // Check if we need to connect (Client Mode)
+                        if should_connect {
+                            let mut conns = state.active_connections.lock().unwrap();
+                            if !conns.contains_key(&peer_beacon.device_id) {
+                                // Mark as connecting so we don't spam
+                                conns.insert(peer_beacon.device_id.clone(), true);
+                                
+                                let peer_id = peer_beacon.device_id.clone();
+                                let peer_ip = addr.ip().to_string();
+                                let peer_port = peer_beacon.port;
+                                let my_id_clone = my_id.clone();
+                                let state_clone = state.clone();
+
+                                tokio::spawn(async move {
+                                    // Small random delay to avoid collision if both discover at same time?
+                                    // For now, immediate.
+                                    connect_to_peer(peer_id, peer_ip, peer_port, my_id_clone, state_clone).await;
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -140,22 +274,35 @@ async fn run_discovery(
 
 fn create_multicast_socket() -> std::io::Result<Socket> {
     let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))?;
-    
-    // Reuse address/port is crucial for multiple apps on same machine binding to multicast port
     socket.set_reuse_address(true)?;
     #[cfg(not(target_os = "windows"))]
-    socket.set_reuse_port(true)?; // Linux/macOS specific
+    socket.set_reuse_port(true)?;
 
-    // Bind to 0.0.0.0:PORT
     let addr: SocketAddr = format!("0.0.0.0:{}", PORT).parse().unwrap();
     socket.bind(&addr.into())?;
 
-    // Join Multicast Group
     let multi_addr: Ipv4Addr = MULTICAST_ADDR.parse().unwrap();
-    let interface = Ipv4Addr::new(0, 0, 0, 0); // ANY interface
+    let interface = Ipv4Addr::new(0, 0, 0, 0); 
     socket.join_multicast_v4(&multi_addr, &interface)?;
 
     socket.set_nonblocking(true)?;
-
     Ok(socket)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_beacon_serialization() {
+        let beacon = Beacon {
+            device_id: "test-id".to_string(),
+            name: "test-node".to_string(),
+            port: 1234,
+        };
+        let json = serde_json::to_string(&beacon).unwrap();
+        let decoded: Beacon = serde_json::from_str(&json).unwrap();
+        assert_eq!(decoded.device_id, "test-id");
+        assert_eq!(decoded.port, 1234);
+    }
 }
