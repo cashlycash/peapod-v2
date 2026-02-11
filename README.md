@@ -38,6 +38,21 @@ iwr https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.ps1 | 
 2.  Setup: `npm install`
 3.  Run: `npm run tauri dev`
 
+## 🏃 Usage
+
+### Desktop GUI
+Just run the app from your launcher or terminal:
+```bash
+./PeaPod-v0.8.0.AppImage
+```
+
+### Headless Daemon (Server Mode)
+For servers, Raspberry Pis, or broken Linux desktops (EGL errors):
+```bash
+./PeaPod-v0.8.0.AppImage --daemon
+```
+*This runs the swarm node in the terminal without any GUI.*
+
 ## 🗺️ Feature Status
 
 *   ✅ **Phase 1: Discovery** (UDP Multicast Beaconing)

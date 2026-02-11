@@ -1,6 +1,6 @@
 [package]
 name = "peapod"
-version = "0.6.0"
+version = "0.8.0"
 description = "PeaPod: Local swarm protocol"
 authors = ["CashlyCash"]
 edition = "2021"
@@ -15,6 +15,7 @@ serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 socket2 = { version = "0.5", features = ["all"] }
+clap = { version = "4.4", features = ["derive"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
