@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import './style.css';
 
 interface PeerPayload {
   id: string;
@@ -17,66 +18,70 @@ function App() {
   const [peers, setPeers] = useState<Peer[]>([]);
 
   useEffect(() => {
-    // Listen for discovery events from Rust
     let unlisten: (() => void) | undefined;
-
     const setupListener = async () => {
       unlisten = await listen<PeerPayload>('peer-update', (event) => {
         const newPeer = event.payload;
         setPeers((prev) => {
           const exists = prev.find((p) => p.id === newPeer.id);
           if (exists) {
-            // Update timestamp
             return prev.map((p) => 
               p.id === newPeer.id ? { ...p, lastSeen: Date.now(), status: 'active' } : p
             );
           }
-          // Add new peer
           return [...prev, { ...newPeer, status: 'active', lastSeen: Date.now() }];
         });
       });
     };
-
     setupListener();
-
-    // Cleanup on unmount
-    return () => {
-      if (unlisten) unlisten();
-    };
+    return () => { if (unlisten) unlisten(); };
   }, []);
 
   return (
-    <div className="container">
-      <h1>PeaPod Discovery 🫛</h1>
-      <p className="subtitle">Scanning for nearby pods...</p>
+    <div className="layout">
+      <header className="header">
+        <div className="brand">
+          <span className="icon">🫛</span> PEAPOD_V2
+        </div>
+        <div className="status-badge online">SYSTEM_ONLINE</div>
+      </header>
       
-      <div className="peers-list">
-        {peers.length === 0 ? (
-          <div className="empty-state">
-            <p>No peers found yet.</p>
-            <div className="pulse-loader"></div>
+      <main className="main-content">
+        <section className="panel">
+          <div className="panel-header">
+            <h3>DISCOVERED_NODES</h3>
+            <span className="count">{peers.length}</span>
           </div>
-        ) : (
-          <ul>
-            {peers.map((peer) => (
-              <li key={peer.id} className="peer-item">
-                <div className="peer-info">
-                  <span className="peer-name">{peer.name}</span>
-                  <span className="peer-ip">{peer.ip}:{peer.port}</span>
-                </div>
-                <div className="peer-status">
-                  <span className={`status-dot ${peer.status}`}></span>
-                  <span className="status-text">{peer.status}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="actions">
-        <button onClick={() => setPeers([])}>Clear List</button>
-      </div>
+          <div className="panel-body">
+            {peers.length === 0 ? (
+              <div className="empty-state">
+                <span className="scanner">SCANNING_LAN...</span>
+              </div>
+            ) : (
+              <div className="grid">
+                {peers.map((peer) => (
+                  <div key={peer.id} className="card">
+                    <div className="card-header">
+                      <span className="peer-name">{peer.name}</span>
+                      <span className={`status-indicator ${peer.status}`}></span>
+                    </div>
+                    <div className="card-body">
+                      <div className="stat">
+                        <label>ID</label>
+                        <span className="mono">{peer.id.slice(0, 8)}...</span>
+                      </div>
+                      <div className="stat">
+                        <label>ADDR</label>
+                        <span className="mono">{peer.ip}:{peer.port}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

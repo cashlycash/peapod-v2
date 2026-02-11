@@ -9,6 +9,11 @@ Build the user interface in `src/`. Connect to the Rust backend via Tauri APIs (
 2.  **State:** Use React hooks wisely. Don't over-engineer state unless needed (Zustand/Context).
 3.  **Tauri:** You are the consumer of the backend. If an event is missing, ask `rust-core` to implement it.
 4.  **Style:** Dark mode by default. Clean lines.
+5.  **Aesthetics:** Follow `frontend-design` skill guidelines (Bold, Unique, No "AI Slop").
+
+## Tools
+- Use `react-perf` skill to optimize rendering.
+- Use `frontend-design` skill for visual direction.
 
 ## Context
 - Project: PeaPod v2.

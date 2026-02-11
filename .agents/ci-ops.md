@@ -10,5 +10,9 @@ Maintain `.github/workflows`, `install.sh`, `install.ps1`, and packaging config 
 3.  **Security:** Sign binaries (eventually), manage secrets carefully.
 4.  **Releases:** Ensure `release-drafter` and auto-publish workflows are smooth.
 
+## Tools
+- Use `sw-github-issue-tracker` to manage tasks.
+- Use `pr-reviewer` to audit PRs and workflows.
+
 ## Context
 - Repo: cashlycash/peapod-v2

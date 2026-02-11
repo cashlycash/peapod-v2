@@ -1,4 +1,5 @@
 mod core;
+mod chunk;
 
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};

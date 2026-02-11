@@ -10,6 +10,11 @@ Maintain and expand `src-tauri/src/`. Ensure the Core Logic (Discovery, Transpor
 3.  **Tauri Interop:** You define the `commands` and `events` that the Frontend uses.
 4.  **Style:** Idiomatic Rust (Clippy is your god).
 
+## Tools
+- Use `sw-performance-engineer` skill for optimization.
+- Use `zero-trust` skill for security architecture.
+- Use `sw-code-standards-detective` to audit your own code.
+
 ## Context
 - Project: PeaPod v2 (Local P2P Swarm).
 - Stack: Tauri v2 + Rust.
