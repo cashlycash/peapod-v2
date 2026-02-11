@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
 import './style.css';
 
 interface PeerPayload {
@@ -79,6 +80,25 @@ function App() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+        
+        <section className="panel" style={{ marginTop: '1rem' }}>
+          <div className="panel-header">
+            <h3>ACTIONS</h3>
+          </div>
+          <div className="panel-body actions-body">
+            <button onClick={async () => {
+              try {
+                const res = await invoke('start_test_transfer');
+                console.log(res);
+                alert(res);
+              } catch (e) {
+                console.error(e);
+              }
+            }}>
+              INITIATE_TEST_TRANSFER
+            </button>
           </div>
         </section>
       </main>
