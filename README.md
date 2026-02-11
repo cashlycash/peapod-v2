@@ -1,56 +1,61 @@
 # PeaPod v2 🫛🚀
 
-> **"The next evolution of peer-to-peer swarming (now with 100% more Rust 🦀)"**
+> **⚠️ STATUS: ALPHA**
+> This software is currently in **ALPHA**. It may crash, eat your bandwidth, or refuse to work. Use at your own risk.
 
-## What is this?
+![Test Suite](https://github.com/cashlycash/peapod-v2/actions/workflows/test.yml/badge.svg)
 
-This is a complete rewrite of the PeaPod protocol. We're moving from the old architecture to a modern, modular stack:
-*   **Core Logic:** Rust (Speed, Safety, 🦀)
-*   **UI:** React + TypeScript (via Tauri v2)
-*   **Vibe:** Immaculate
+**PeaPod** is a local peer-to-peer swarming protocol. It pools internet connections from nearby devices to speed up downloads.
 
-## The Grand Plan (Roadmap)
+## 📥 Installation (Alpha)
 
-We are executing a 5-Phase Plan for World Domination™️ (or just file sharing):
+**Latest Release:** [Check Releases Page](https://github.com/cashlycash/peapod-v2/releases)
 
-1.  **Phase 1: Discovery UI (Current)**
-    *   See nearby devices on the LAN.
-    *   UDP Multicast/Broadcast beaconing.
-    *   "Oh look, there's Harshit's laptop!"
+### One-Line Installers (Coming Soon in Beta)
+*Once we stabilize, these will work:*
+```bash
+# Linux / macOS
+curl -fsSL https://peapod.io/install.sh | sh
+```
+```powershell
+# Windows
+iwr https://peapod.io/install.ps1 | iex
+```
 
-2.  **Phase 2: Basic Communication**
-    *   Establish reliable TCP/QUIC pipes between peers.
-    *   Handshakes, Identity Exchange.
-
-3.  **Phase 3: The Chunking**
-    *   Split large files into tiny, edible peas (chunks).
-    *   Manage state (Pending, Downloading, Done).
-
-4.  **Phase 4: Distribution (The Swarm)**
-    *   Assign chunks to peers.
-    *   "Hey you, download bytes 0-1MB for me."
-
-5.  **Phase 5: Assembly**
-    *   Put Humpty Dumpty back together again.
-    *   Verify hashes, write to disk.
-
-## How to Run
+## 🛠️ Build from Source
 
 ### Prerequisites
 *   **Node.js** (v18+)
 *   **Rust** (stable)
-*   **Tauri CLI** (`cargo install tauri-cli --version "^2.0.0-beta"`)
+*   **Tauri CLI** (`cargo install tauri-cli`)
+*   **Linux deps:** `libwebkit2gtk-4.0-dev`, `build-essential`, `curl`, `wget`, `file`, `libssl-dev`, `libgtk-3-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`
 
-### Dev Mode
-```bash
-npm install
-npm run tauri dev
-```
+### Steps
+1.  Clone the repo:
+    ```bash
+    git clone https://github.com/cashlycash/peapod-v2.git
+    cd peapod-v2
+    ```
+2.  Install frontend dependencies:
+    ```bash
+    npm install
+    ```
+3.  Run in Dev Mode:
+    ```bash
+    npm run tauri dev
+    ```
+4.  Build Release:
+    ```bash
+    npm run tauri build
+    ```
 
-### Build
-```bash
-npm run tauri build
-```
+## 🗺️ Roadmap
+
+1.  **Phase 1: Discovery (✅ Done)** - UDP Multicast beaconing.
+2.  **Phase 2: Transport (🚧 In Progress)** - TCP/QUIC direct messaging.
+3.  **Phase 3: Chunking** - Logic to split files.
+4.  **Phase 4: Distribution** - Assigning work to peers.
+5.  **Phase 5: Assembly** - Rebuilding files.
 
 ---
-*Maintained by CashlyBot (and hopefully Harshit if he reads this).*
+*Maintained by CashlyBot & HKTITAN.*
