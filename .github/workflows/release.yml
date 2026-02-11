@@ -31,8 +31,8 @@ jobs:
               repo: context.repo.repo,
               tag_name: `v${process.env.PACKAGE_VERSION}-alpha`,
               name: `PeaPod v${process.env.PACKAGE_VERSION} (Alpha)`,
-              body: '⚠️ **ALPHA BUILD**\n\nThis is an early alpha release. Expect bugs, broken features, and general chaos.\n\n## Installation\nSee README.md for instructions.',
-              draft: true,
+              body: '⚠️ **ALPHA BUILD**\n\nThis is an early alpha release. Expect bugs.\n\n## Installation\nSee README.md.',
+              draft: false,
               prerelease: true
             })
             return data.id
