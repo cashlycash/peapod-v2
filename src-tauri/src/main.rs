@@ -8,11 +8,13 @@ use socket2::{Domain, Protocol, Socket, Type};
 use tauri::{AppHandle, Manager, State};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream, UdpSocket};
+use tokio::sync::Mutex as TokioMutex;
 use uuid::Uuid;
 
 const MULTICAST_ADDR: &str = "239.255.60.60";
 const PORT: u16 = 45678;
 const TCP_PORT: u16 = 45679;
+const MAX_HANDSHAKE_SIZE: usize = 4096;
 
 // Beacon: The "Hello" message
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,6 +51,7 @@ struct ConnectionEvent {
 struct AppState {
     peers: Mutex<HashMap<String, Beacon>>,
     connected_peers: Mutex<HashMap<String, String>>, // peer_id -> ip:port
+    streams: TokioMutex<HashMap<String, TcpStream>>, // peer_id -> active stream
     my_id: String,
     my_name: String,
 }
@@ -61,6 +64,7 @@ async fn main() {
     let app_state = Arc::new(AppState {
         peers: Mutex::new(HashMap::new()),
         connected_peers: Mutex::new(HashMap::new()),
+        streams: TokioMutex::new(HashMap::new()),
         my_id: my_id.clone(),
         my_name: my_name.clone(),
     });
@@ -134,11 +138,15 @@ async fn connect_to_peer(
     };
 
     match perform_handshake(stream, &handshake).await {
-        Ok(remote_handshake) => {
-            // Store connection
+        Ok((remote_handshake, tcp_stream)) => {
+            // Store connection and stream
             {
                 let mut connected = state.connected_peers.lock().unwrap();
                 connected.insert(peer_id.clone(), addr);
+            }
+            {
+                let mut streams = state.streams.lock().await;
+                streams.insert(peer_id.clone(), tcp_stream);
             }
 
             // Emit connection event to frontend
@@ -174,6 +182,10 @@ async fn disconnect_from_peer(
             return Err("Not connected to this peer".into());
         }
     }
+    {
+        let mut streams = state.streams.lock().await;
+        streams.remove(&peer_id);
+    }
 
     let event = ConnectionEvent {
         peer_id,
@@ -195,7 +207,7 @@ fn get_connections(state: State<'_, Arc<AppState>>) -> Vec<String> {
 async fn perform_handshake(
     mut stream: TcpStream,
     local: &Handshake,
-) -> Result<Handshake, String> {
+) -> Result<(Handshake, TcpStream), String> {
     let payload = serde_json::to_vec(local).map_err(|e| e.to_string())?;
     let len = (payload.len() as u32).to_be_bytes();
 
@@ -217,7 +229,7 @@ async fn perform_handshake(
         .map_err(|e| format!("Read length failed: {}", e))?;
     let msg_len = u32::from_be_bytes(len_buf) as usize;
 
-    if msg_len > 4096 {
+    if msg_len > MAX_HANDSHAKE_SIZE {
         return Err("Handshake message too large".into());
     }
 
@@ -230,7 +242,7 @@ async fn perform_handshake(
     let remote: Handshake =
         serde_json::from_slice(&msg_buf).map_err(|e| format!("Parse handshake failed: {}", e))?;
 
-    Ok(remote)
+    Ok((remote, stream))
 }
 
 // Phase 2: TCP listener - accepts incoming peer connections
@@ -283,16 +295,20 @@ async fn handle_incoming_connection(
     };
 
     match perform_handshake(stream, &local_handshake).await {
-        Ok(remote) => {
+        Ok((remote, tcp_stream)) => {
             println!(
                 "Handshake complete with {} ({})",
                 remote.name, remote.device_id
             );
 
-            // Store connection
+            // Store connection and stream
             {
                 let mut connected = state.connected_peers.lock().unwrap();
                 connected.insert(remote.device_id.clone(), peer_addr.to_string());
+            }
+            {
+                let mut streams = state.streams.lock().await;
+                streams.insert(remote.device_id.clone(), tcp_stream);
             }
 
             let event = ConnectionEvent {

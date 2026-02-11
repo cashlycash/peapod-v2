@@ -46,11 +46,18 @@ function App() {
       unlistenConn = await listen<ConnectionEvent>('connection-status', (event) => {
         const { peer_id, status } = event.payload;
         setPeers((prev) =>
-          prev.map((p) =>
-            p.id === peer_id
-              ? { ...p, connectionStatus: status === 'connected' ? 'connected' : status === 'error' ? 'error' : 'disconnected' }
-              : p
-          )
+          prev.map((p) => {
+            if (p.id !== peer_id) return p;
+            let connectionStatus: Peer['connectionStatus'];
+            if (status === 'connected') {
+              connectionStatus = 'connected';
+            } else if (status === 'error') {
+              connectionStatus = 'error';
+            } else {
+              connectionStatus = 'disconnected';
+            }
+            return { ...p, connectionStatus };
+          })
         );
       });
     };
