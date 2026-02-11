@@ -11,15 +11,17 @@
 
 **Latest Release:** [Check Releases Page](https://github.com/cashlycash/peapod-v2/releases)
 
-### One-Line Installers (Coming Soon in Beta)
-*Once we stabilize, these will work:*
+### One-Line Installers (Alpha)
+*Uses scripts from the repo:*
+
+**Linux / macOS:**
 ```bash
-# Linux / macOS
-curl -fsSL https://peapod.io/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.sh | sh
 ```
+
+**Windows (PowerShell):**
 ```powershell
-# Windows
-iwr https://peapod.io/install.ps1 | iex
+iwr https://raw.githubusercontent.com/cashlycash/peapod-v2/master/install.ps1 | iex
 ```
 
 ## 🛠️ Build from Source
