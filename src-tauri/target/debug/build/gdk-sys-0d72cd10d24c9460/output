@@ -33,17 +33,22 @@ cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64-unknown-linux-gnu
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64_unknown_linux_gnu
 cargo:rerun-if-env-changed=HOST_PKG_CONFIG_SYSROOT_DIR
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/gtk+3/3.24.51/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/pango/1.57.0_2/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/harfbuzz/12.3.2/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/cairo/1.18.4/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/lib
 cargo:rustc-link-lib=gdk-3
-cargo:rustc-link-lib=z
 cargo:rustc-link-lib=pangocairo-1.0
 cargo:rustc-link-lib=pango-1.0
 cargo:rustc-link-lib=harfbuzz
 cargo:rustc-link-lib=gdk_pixbuf-2.0
 cargo:rustc-link-lib=cairo-gobject
-cargo:rustc-link-lib=cairo
 cargo:rustc-link-lib=gobject-2.0
 cargo:rustc-link-lib=glib-2.0
-cargo:include=/usr/include/gtk-3.0:/usr/include/pango-1.0:/usr/include:/usr/include/harfbuzz:/usr/include/gdk-pixbuf-2.0:/usr/include/glycin-2:/usr/include/cairo:/usr/include/freetype2:/usr/include/libpng16:/usr/include/pixman-1:/usr/include/cloudproviders:/usr/include/gio-unix-2.0:/usr/include/glib-2.0:/usr/lib/glib-2.0/include:/usr/include/libmount:/usr/include/blkid:/usr/include/sysprof-6:/usr/include/fribidi
+cargo:rustc-link-lib=cairo
+cargo:include=/home/linuxbrew/.linuxbrew/Cellar/gtk+3/3.24.51/include/gtk-3.0:/home/linuxbrew/.linuxbrew/Cellar/pango/1.57.0_2/include/pango-1.0:/home/linuxbrew/.linuxbrew/Cellar/libthai/0.1.30/include:/home/linuxbrew/.linuxbrew/Cellar/libdatrie/0.2.14/include:/home/linuxbrew/.linuxbrew/Cellar/harfbuzz/12.3.2/include/harfbuzz:/home/linuxbrew/.linuxbrew/opt/graphite2/include:/home/linuxbrew/.linuxbrew/include/gdk-pixbuf-2.0:/home/linuxbrew/.linuxbrew/opt/libtiff/include:/home/linuxbrew/.linuxbrew/opt/zstd/include:/home/linuxbrew/.linuxbrew/Cellar/xz/5.8.2/include:/home/linuxbrew/.linuxbrew/opt/jpeg-turbo/include:/home/linuxbrew/.linuxbrew/Cellar/cairo/1.18.4/include/cairo:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/include/gio-unix-2.0:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/include:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/include/glib-2.0:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/lib/glib-2.0/include:/home/linuxbrew/.linuxbrew/Cellar/pcre2/10.47_1/include:/home/linuxbrew/.linuxbrew/Cellar/util-linux/2.41.3_1/include/libmount:/home/linuxbrew/.linuxbrew/Cellar/util-linux/2.41.3_1/include/blkid:/home/linuxbrew/.linuxbrew/Cellar/libxi/1.8.2/include:/home/linuxbrew/.linuxbrew/Cellar/xorgproto/2025.1/include:/home/linuxbrew/.linuxbrew/Cellar/libxrandr/1.5.5/include:/home/linuxbrew/.linuxbrew/Cellar/libxdamage/1.1.7/include:/home/linuxbrew/.linuxbrew/Cellar/libxinerama/1.1.6/include:/home/linuxbrew/.linuxbrew/Cellar/libxkbcommon/1.13.1/include:/home/linuxbrew/.linuxbrew/Cellar/wayland/1.24.0_1/include:/home/linuxbrew/.linuxbrew/Cellar/libffi/3.5.2/include:/home/linuxbrew/.linuxbrew/Cellar/cairo/1.18.4/include:/home/linuxbrew/.linuxbrew/Cellar/fontconfig/2.17.1/include:/home/linuxbrew/.linuxbrew/Cellar/expat/2.7.4/include:/home/linuxbrew/.linuxbrew/opt/freetype/include/freetype2:/home/linuxbrew/.linuxbrew/opt/bzip2/include:/home/linuxbrew/.linuxbrew/opt/libpng/include/libpng16:/home/linuxbrew/.linuxbrew/opt/zlib/include:/home/linuxbrew/.linuxbrew/Cellar/libxrender/0.9.12/include:/home/linuxbrew/.linuxbrew/Cellar/libxcb/1.17.0/include:/home/linuxbrew/.linuxbrew/Cellar/pixman/0.46.4/include/pixman-1:/home/linuxbrew/.linuxbrew/Cellar/libepoxy/1.5.10/include:/home/linuxbrew/.linuxbrew/Cellar/mesa/25.3.5/include:/home/linuxbrew/.linuxbrew/Cellar/libxfixes/6.0.2/include:/home/linuxbrew/.linuxbrew/Cellar/libx11/1.8.13/include:/home/linuxbrew/.linuxbrew/Cellar/libxxf86vm/1.1.7/include:/home/linuxbrew/.linuxbrew/Cellar/libxext/1.3.7/include:/home/linuxbrew/.linuxbrew/Cellar/libxau/1.0.12/include:/home/linuxbrew/.linuxbrew/Cellar/libxdmcp/1.1.5/include:/home/linuxbrew/.linuxbrew/Cellar/libdrm/2.4.131/include:/home/linuxbrew/.linuxbrew/Cellar/libdrm/2.4.131/include/libdrm:/home/linuxbrew/.linuxbrew/Cellar/fribidi/1.0.16/include/fribidi
 cargo:rerun-if-env-changed=SYSTEM_DEPS_BUILD_INTERNAL
 cargo:rerun-if-env-changed=SYSTEM_DEPS_LINK
 cargo:rerun-if-env-changed=SYSTEM_DEPS_GDK_3_0_LIB
@@ -76,7 +81,6 @@ cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64-unknown-linux-gnu
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64_unknown_linux_gnu
 cargo:rerun-if-env-changed=HOST_PKG_CONFIG_SYSROOT_DIR
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
-cargo:backends=broadway wayland x11
-cargo:rustc-cfg=gdk_backend="broadway"
+cargo:backends=wayland x11
 cargo:rustc-cfg=gdk_backend="wayland"
 cargo:rustc-cfg=gdk_backend="x11"

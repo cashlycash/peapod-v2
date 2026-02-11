@@ -18,6 +18,5 @@ cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64-unknown-linux-gnu
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64_unknown_linux_gnu
 cargo:rerun-if-env-changed=HOST_PKG_CONFIG_SYSROOT_DIR
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
-cargo:rustc-cfg=gdk_backend="broadway"
 cargo:rustc-cfg=gdk_backend="wayland"
 cargo:rustc-cfg=gdk_backend="x11"

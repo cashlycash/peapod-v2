@@ -33,10 +33,12 @@ cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64-unknown-linux-gnu
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR_x86_64_unknown_linux_gnu
 cargo:rerun-if-env-changed=HOST_PKG_CONFIG_SYSROOT_DIR
 cargo:rerun-if-env-changed=PKG_CONFIG_SYSROOT_DIR
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/at-spi2-core/2.58.3/lib
+cargo:rustc-link-search=native=/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/lib
 cargo:rustc-link-lib=atk-1.0
 cargo:rustc-link-lib=gobject-2.0
 cargo:rustc-link-lib=glib-2.0
-cargo:include=/usr/include/atk-1.0:/usr/include:/usr/include/glib-2.0:/usr/lib/glib-2.0/include:/usr/include/sysprof-6
+cargo:include=/home/linuxbrew/.linuxbrew/Cellar/at-spi2-core/2.58.3/include/atk-1.0:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/include:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/include/glib-2.0:/home/linuxbrew/.linuxbrew/Cellar/glib/2.86.3/lib/glib-2.0/include:/home/linuxbrew/.linuxbrew/Cellar/pcre2/10.47_1/include:/home/linuxbrew/.linuxbrew/Cellar/libffi/3.5.2/include
 cargo:rerun-if-env-changed=SYSTEM_DEPS_BUILD_INTERNAL
 cargo:rerun-if-env-changed=SYSTEM_DEPS_LINK
 cargo:rerun-if-env-changed=SYSTEM_DEPS_ATK_LIB
