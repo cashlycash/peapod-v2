@@ -5,13 +5,14 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 use uuid::Uuid;
 use crate::core::{run_discovery, run_tcp_listener, AppState, Beacon, PeerEmitter};
+use crate::chunk::ChunkManager;
 
 // Event payload to Frontend
 #[derive(Debug, Clone, serde::Serialize)]
 struct PeerFound {
     id: String,
     name: String,
-    ip: String, // In a real app we might want IP, but Beacon has just port
+    ip: String, 
     port: u16,
 }
 
@@ -24,7 +25,7 @@ impl PeerEmitter for TauriEmitter {
          let event = PeerFound {
             id: peer.device_id,
             name: peer.name,
-            ip: "unknown".to_string(), // Simplified for now
+            ip: "unknown".to_string(), 
             port: peer.port,
         };
         let _ = self.handle.emit("peer-update", &event);
@@ -33,7 +34,12 @@ impl PeerEmitter for TauriEmitter {
 
 #[tokio::main]
 async fn main() {
-    let app_state = Arc::new(AppState::default());
+    let chunk_manager = Arc::new(ChunkManager::new());
+    let app_state = Arc::new(AppState {
+        chunk_manager, // Init chunk manager
+        ..Default::default()
+    });
+    
     let my_id = Uuid::new_v4().to_string();
     let my_name = "CashlyPod".to_string(); 
 
@@ -44,6 +50,7 @@ async fn main() {
             let id_clone = my_id.clone();
             let name_clone = my_name.clone();
             let tcp_id = my_id.clone();
+            let tcp_state = app_state.clone();
 
             let emitter = TauriEmitter { handle };
 
@@ -54,7 +61,7 @@ async fn main() {
 
             // Spawn TCP Listener
             tauri::async_runtime::spawn(async move {
-                run_tcp_listener(tcp_id, 45679).await;
+                run_tcp_listener(tcp_id, 45679, tcp_state).await;
             });
 
             Ok(())
