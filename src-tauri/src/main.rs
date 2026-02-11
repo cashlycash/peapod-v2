@@ -4,7 +4,7 @@ use peapod::protocol::Beacon;
 use peapod::state::{AppState, PeerEmitter};
 use peapod::transport::run_tcp_listener;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
 // Event payload to Frontend
