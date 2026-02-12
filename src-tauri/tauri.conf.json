@@ -1,6 +1,6 @@
 {
   "productName": "peapod",
-  "version": "0.8.0",
+  "version": "0.8.1-alpha",
   "identifier": "com.cashlycash.peapod",
   "build": {
     "beforeDevCommand": "npm run dev",
