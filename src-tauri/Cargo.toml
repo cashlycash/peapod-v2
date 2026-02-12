@@ -1,6 +1,6 @@
 [package]
 name = "peapod"
-version = "0.8.2.0"
+version = "0.8.2"
 description = "PeaPod: Local swarm protocol"
 authors = ["CashlyCash"]
 edition = "2021"
