@@ -8,8 +8,8 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use crate::state::AppState;
-use crate::protocol::Beacon;
+use peapod::state::AppState;
+use uuid::Uuid;
 
 #[derive(Serialize)]
 struct PeerInfo {
@@ -81,8 +81,8 @@ async fn get_status(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 }
 
 async fn start_transfer(
-    State(state): State<Arc<AppState>>,
-    Json(request): Json<TransferRequest>,
+    State(_state): State<Arc<AppState>>,
+    Json(_request): Json<TransferRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     // In a real implementation, this would start a file transfer
     // For now, we'll just simulate it
