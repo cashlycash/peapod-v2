@@ -3,6 +3,7 @@ mod discovery;
 mod protocol;
 mod state;
 mod transport;
+mod webserver;
 
 use clap::Parser;
 use peapod::chunk::ChunkManager;
@@ -67,7 +68,7 @@ async fn start_test_transfer(state: tauri::State<'_, Arc<AppState>>) -> Result<S
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-    
+
     let chunk_manager = Arc::new(ChunkManager::new());
     let app_state = Arc::new(AppState {
         chunk_manager,
@@ -80,7 +81,7 @@ async fn main() {
     if args.daemon {
         println!("🚀 Starting PeaPod in HEADLESS DAEMON MODE");
         println!("ID: {}", my_id);
-        
+
         let id_clone = my_id.clone();
         let name_clone = my_name.clone();
         let state_clone = app_state.clone();
@@ -92,13 +93,19 @@ async fn main() {
             run_tcp_listener(tcp_id, 45679, tcp_state).await;
         });
 
+        // Spawn Webserver (for remote control/debugging)
+        let webserver_state = app_state.clone();
+        tokio::spawn(async move {
+            webserver::start_webserver(webserver_state).await;
+        });
+
         // Run Discovery (Blocking main thread or await)
         run_discovery(
-            id_clone, 
-            name_clone, 
-            45679, 
-            45678, 
-            state_clone, 
+            id_clone,
+            name_clone,
+            45679,
+            45678,
+            state_clone,
             CliEmitter
         ).await;
 

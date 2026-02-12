@@ -63,7 +63,7 @@ impl ChunkManager {
         map.insert(file_id.clone(), transfer);
         file_id
     }
-    
+
     pub fn register_source_file(&self, path: String, total_size: u64) -> String {
         let file_id = Uuid::new_v4().to_string();
         let chunks = self.calculate_chunks(total_size);
@@ -78,6 +78,11 @@ impl ChunkManager {
         let mut map = self.transfers.lock().unwrap();
         map.insert(file_id.clone(), transfer);
         file_id
+    }
+
+    pub fn get_active_transfers(&self) -> usize {
+        let map = self.transfers.lock().unwrap();
+        map.len()
     }
 
     fn calculate_chunks(&self, total_size: u64) -> Vec<Chunk> {
